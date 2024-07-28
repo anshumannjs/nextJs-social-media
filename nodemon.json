@@ -1,0 +1,15 @@
+{
+    "watch": [
+        "app/**"
+    ],
+    "ext": "ts",
+    "exec": "ts-node ./app/backend/index.ts",
+    "env": {
+        "CLOUDINARY_KEY": "659174489162285",
+        "CLOUDINARY_SECRET": "lOx5d3oNZEYZalFD99vs5rjsQUM",
+        "CLOUDINARY_CLOUD_NAME": "dk9nhev7a",
+        "CLOUDINARY_URL": "cloudinary://659174489162285:lOx5d3oNZEYZalFD99vs5rjsQUM@dk9nhev7a",
+        "GOOGLE_CLIENT_ID": "586189219806-glcpndbhcuvm6pkbabib6iefknb6afed.apps.googleusercontent.com",
+        "GOOGLE_CLIENT_SECRET": "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"
+    }
+}
