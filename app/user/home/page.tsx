@@ -7,12 +7,17 @@ import { useSession } from "next-auth/react";
 import { useMutation } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { useSearchParams } from "next/navigation";
+import { socket } from "@/app/socket";
 
 const HomePage = ({searchParams}: {searchParams: string}) => {
   // const { toast } = useToast();
   const {data: sessionData}=useSession();
   console.log(sessionData)
-  console.log(window.location.host)
+  console.log(socket.connected)
+
+  socket.on("hello", (notificationObj)=>{
+    console.log(notificationObj)
+  })
   
   const {mutate: fetchFeedPosts, data: posts, isPending: isPostLoading, isError:isErrorPosts}=useMutation({
     mutationFn: ()=>handlePost(),

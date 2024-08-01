@@ -16,7 +16,7 @@ export function ForgotPassword({ toggleForgotPassword, toggleLoading }: { toggle
 
   const [email, setEmail]=useState("")
   const toggleVisibility = () => setIsVisible(!isVisible);
-  const arrComponents = [EnterEmail, CheckMail, SetPassword, AllDone]
+  const arrComponents = [EnterEmail, CheckMail]
   const [component, setComponent] = useState(EnterEmail({email, setEmail}))
   const [step, setStep] = useState(1)
 
@@ -24,7 +24,7 @@ export function ForgotPassword({ toggleForgotPassword, toggleLoading }: { toggle
 
   const {mutate}=useMutation({
     mutationFn: ()=>postEmail(email),
-    onSuccess: (data)=>console.log(data),
+    onSuccess: (data)=>{toggleComponents()},
     onMutate: ()=>console.log("hello")
   })
 
@@ -51,10 +51,10 @@ export function ForgotPassword({ toggleForgotPassword, toggleLoading }: { toggle
       transition={{
         duration: 0.5
       }}>
-      <ProgressNextUi
-        label={`Step ${step}/4`}
+        {/* @ts-ignore */}
+      <ProgressNextUi label={`Step ${step}/2`}
         size="md"
-        value={step * 25}
+        value={step * 50}
         color="success"
         showValueLabel={true}
         className="max-w-md mx-auto mt-5"
@@ -62,10 +62,10 @@ export function ForgotPassword({ toggleForgotPassword, toggleLoading }: { toggle
 
       <div className={cn("flex items-center justify-center py-12")}>
         <div className="mx-auto grid w-[350px] gap-6">
-          {arrComponents[step - 1]({ toggleVisibility, isVisible, email, setEmail })}
+          {arrComponents[step - 1]({ email, setEmail })}
           <div className="grid gap-4">
             {
-              step == 4 ? "" :
+              step == 2 ? "" :
                 <ButtonNextUi onClick={()=>mutate()} type="submit" variant="shadow" className="w-full bg-gradient-to-r from-purple-600 to-blue-600 font-bold text-white text-lg">
                   Continue
                 </ButtonNextUi>

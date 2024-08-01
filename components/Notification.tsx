@@ -5,8 +5,9 @@ import { IUserDetailsSchema } from "@/database/schema/userDetails"
 import { ModalHeader, ModalBody, Tab, Tabs, Modal, ModalContent } from "@nextui-org/react"
 import { Loader } from "lucide-react"
 import { useSession } from "next-auth/react"
-import { useEffect, useState } from "react"
+import { Dispatch, SetStateAction, useEffect, useState } from "react"
 import Image, { ImageLoader } from "next/image"
+import { socket } from "@/app/socket"
 
 // recipentArr: string[],
 //     readUsers: string[],
@@ -18,26 +19,27 @@ import Image, { ImageLoader } from "next/image"
 //     senderName: string
 
 function NotiFicationCard({ notificationObj }: { notificationObj: INotificationSchema, status: string }) {
-  const [senderDetails, setSenderDetails]=useState<IUserSchema|null>(null)
+  const [senderDetails, setSenderDetails] = useState<IUserSchema | null>(null)
 
   useEffect(() => {
-    fetch("api/user", {
+    fetch(`${process.env.NEXT_PUBLIC_URL}/api/user`, {
       method: "POST",
       body: JSON.stringify({ id: notificationObj.sender })
-    }).then((e)=>e.json()).then((res: {status: number, user: IUserSchema, userDetails: IUserDetailsSchema})=>{
+    }).then((e) => e.json()).then((res: { status: number, user: IUserSchema, userDetails: IUserDetailsSchema }) => {
       setSenderDetails(res.user)
-    }).catch((err)=>console.log(err))
+    }).catch((err) => console.log(err))
   }, [])
+  console.log(senderDetails)
 
-  if (!senderDetails){
-    return(
+  if (!senderDetails) {
+    return (
       <Loader />
     )
   }
 
   return (
     <div className="flex">
-      <Image src={senderDetails?.image || ""} width={10} height={10} alt={"senderImage"} loader={Loader as ImageLoader}/>
+      <Image src={senderDetails?.image || ""} width={10} height={10} alt={"senderImage"} />
 
       <div>
         {senderDetails.firstName} {notificationObj.about}
@@ -46,31 +48,48 @@ function NotiFicationCard({ notificationObj }: { notificationObj: INotificationS
   )
 }
 
-export default function Notification({ isOpen, onOpen, onOpenChange }: { isOpen: boolean, onOpenChange: () => void, onOpen: () => void }) {
+export default function Notification({
+  isOpen,
+  onOpen,
+  onOpenChange,
+  notificationArr,
+  setNotificationArr
+}: {
+  isOpen: boolean,
+  onOpenChange: () => void,
+  onOpen: () => void,
+  notificationArr: any[] | undefined,
+  setNotificationArr: Dispatch<SetStateAction<any[] | undefined>>
+}) {
   const { data, status } = useSession()
-  console.log(status)
+  console.log(data)
   const [notificationData, setNotificationData] = useState<INotificationSchema[] | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
-    console.log("hello")
-    if (status == "authenticated") {
-      fetch("/api/notification").then((res) => res.json()).then((data: { status: number, notificationArr: INotificationSchema[] }) => {
-        setNotificationData(data.notificationArr)
-        setIsLoading(false)
+    console.log(notificationData, notificationArr)
+    if (notificationArr) setNotificationData(notificationArr);
+    else {
+      console.log("fetching notifications")
+      fetch(`${process.env.NEXT_PUBLIC_URL}/api/notification`).then((e) => e.json()).then((res) => {
+        if (res.status === 200) {
+          if (res.notificationArr.length > 0) {
+            setNotificationData(res.notificationArr)
+            setNotificationArr(res.notificationArr)
+          }
+        }
       }).catch((err) => console.log(err))
     }
-  }, [])
-  if (isOpen){
-    console.log("hello")
-    if (status == "authenticated") {
-      fetch("/api/notification").then((res) => res.json()).then((data: { status: number, notificationArr: INotificationSchema[] }) => {
-        setNotificationData(data.notificationArr)
-        setIsLoading(false)
-      }).catch((err) => console.log(err))
-    }
-  }
-  console.log(notificationData, isLoading)
+  }, [notificationArr])
+  // socket.on(`${data?.user._id}`, (notificationObj) => {
+  //   console.log(notificationObj)
+  //   if (notificationData) notificationData.push(notificationObj);
+  //   else setNotificationData([notificationObj])
+  // })
+
+  notificationData?.filter((e) => { return e.unreadUsers.includes(data?.user._id || "") }).map((value, index) => {
+    console.log("notification data here")
+  })
 
   return (
     <div className="">
@@ -90,9 +109,9 @@ export default function Notification({ isOpen, onOpen, onOpenChange }: { isOpen:
                       <Tabs size={"lg"} variant={"underlined"}>
                         <Tab title={"All"}>All</Tab>
                         <Tab title={"Unread"}>{
-                          notificationData?.filter((e)=>{return e.unreadUsers.includes(data?.user._id||"")}).map((value, index)=>{
+                          notificationData?.filter((e) => { return e.unreadUsers.includes(data?.user._id || "") }).map((value, index) => {
                             return (
-                              <NotiFicationCard notificationObj={value} status="unread"/>
+                              <NotiFicationCard notificationObj={value} status="unread" />
                             )
                           })
                         }

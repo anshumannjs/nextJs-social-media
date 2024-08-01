@@ -5,7 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export default async ()=>{
     const session: any = await getServerSession(authOptions)
-    console.log(session)
+    console.log("session", session)
 
     if (session){
         // return NextResponse.redirect(req.url)

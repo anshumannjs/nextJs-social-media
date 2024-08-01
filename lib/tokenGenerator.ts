@@ -9,11 +9,11 @@ export const tokenGenerator=async(userId: ObjectId, objective: string)=>{
     if (user){
         let token: IToken|null = await tokenModel.findOne({userId})
         if (!token){
-            token= await new tokenModel({userId, token: crypto.randomBytes(32).toString("hex")})
+            token= await tokenModel.create({userId, token: crypto.randomBytes(32).toString("hex")})
         }
         if (token){
             const link=`${process.env.NEXT_PUBLIC_URL}/api/auth/${objective}/${userId}/${token.token}`
-            const htmlLink=`${process.env.NEXT_PUBLIC_URL}/${objective}/${userId}/${token.token}`
+            const htmlLink=`${process.env.NEXT_PUBLIC_URL}/auth/${objective}/${userId}/${token.token}`
             const mailOptions={
                 from: process.env.ZOHO_USER||"",
                 to: user.email,

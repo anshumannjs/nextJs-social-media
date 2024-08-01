@@ -6,7 +6,7 @@ import helper from "@/utils/helper"
 export async function POST(req: NextRequest, {params}: {params: {link: string[]}}){
     const userId=params.link[0]
     const token=params.link[1]
-    console.log(userId, token)
+    console.log("userId", token)
 
     const {password}=await req.json()
 
